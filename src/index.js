@@ -4,7 +4,7 @@
  */
 
 function intersect(a, b) {
-  return [...a].filter(x => b .has(x));
+  return a.filter(x => new Set(b).has(x));
 }
 
 function getGraph(preferences = []){
@@ -38,20 +38,23 @@ function getId(elements){
 }
 
 module.exports = function getLoveTrianglesCount(preferences = []) {
-  var graph = getGraph(preferences)  
-  var triangles = new Set();
-  for(let [key, [...set]] of graph) { 
-    var first = new Set([key, ...set]);
-    if(first.size >= 2){      
-      set.forEach(function(i){ 
-        var nextSet = graph.get(i); 
-        var next = new Set([i, ...nextSet]);      
-        var elements = intersect(first, next).sort();
+  var graph = getGraph(preferences);
+  var arrays = [];
+  graph.forEach(function(value, key, map){
+    value.add(key);
+    arrays.push([...value]);
+  })
+  arrays = arrays.filter(function(i){
+    return i.length >= 3;
+  }); 
+  var triangles = new Set();   
+  for(let i = 0; i < arrays.length - 1; i++){
+    for(let j = i + 1; j < arrays.length; j++){
+      var elements = intersect(arrays[i], arrays[j]).sort();
         if(elements.length == 3){
           triangles.add(getId(elements))            
-        }                         
-      })
-    }    
+        }  
+    }
   }
   return triangles.size;
 };
